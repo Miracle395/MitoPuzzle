@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mitosis presentation.</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: linear-gradient(135deg, #2b1055, #7597de);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
+    }
+
+    .card {
+      width: 320px;
+      height: 480px;
+      border-radius: 20px;
+      background-size: cover;
+      background-position: center;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      transition: transform 0.4s ease, opacity 0.4s ease;
+      will-change: transform, opacity;
+      cursor: grab;
+      touch-action: none;
+      position: absolute;
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card" id="card"></div>
+
+  <script>
+    const card = document.getElementById('card');
+    const images = [
+      'mito1.png',
+      'mito2.png',
+      'mito3.png',
+      'mito4.png',
+      'mito5.png',
+      'mito6.png',
+      'mito7.png',
+      'mito8.png',
+      'mito9.png',
+      'mito10.png'
+    ];
+
+    let current = 0;
+    card.style.backgroundImage = `url('${images[current]}')`;
+
+    let isDragging = false;
+    let startX = 0;
+    let currentX = 0;
+
+    card.addEventListener('pointerdown', (e) => {
+      isDragging = true;
+      startX = e.clientX;
+      card.setPointerCapture(e.pointerId);
+    });
+
+    card.addEventListener('pointermove', (e) => {
+      if (!isDragging) return;
+      currentX = e.clientX - startX;
+      card.style.transition = 'none';
+      card.style.transform = `translateX(${currentX}px) rotate(${currentX * 0.15}deg)`;
+    });
+
+    card.addEventListener('pointerup', (e) => {
+      if (!isDragging) return;
+
+      const threshold = 60;
+      const direction = currentX > 0 ? 1 : -1;
+
+      if (Math.abs(currentX) > threshold) {
+        // Fade and slide out
+        card.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
+        card.style.transform = `translateX(${direction * 1000}px) rotate(${direction * 40}deg)`;
+        card.style.opacity = '0';
+
+        setTimeout(() => {
+          // Change index depending on swipe direction
+          if (direction === -1) {
+            current = (current + 1) % images.length;
+          } else {
+            current = (current - 1 + images.length) % images.length;
+          }
+
+          // Reset card style and image
+          card.style.transition = 'none';
+          card.style.transform = 'translateX(0) rotate(0deg)';
+          card.style.backgroundImage = `url('${images[current]}')`;
+
+          // Fade back in
+          requestAnimationFrame(() => {
+            card.style.opacity = '1';
+            card.style.transition = 'opacity 0.4s ease';
+          });
+        }, 400);
+      } else {
+        // Snap back
+        card.style.transition = 'transform 0.3s ease-out';
+        card.style.transform = 'translateX(0) rotate(0deg)';
+      }
+
+      isDragging = false;
+      currentX = 0;
+    });
+  </script>
+</body>
+</html>
